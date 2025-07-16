@@ -9,13 +9,6 @@
         <LangVersion>Latest</LangVersion>
     </PropertyGroup>
 
-    <ItemGroup>
-      <PackageReference Include="GitVersion.MsBuild" Version="6.0.0">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-    </ItemGroup>
-
   <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
