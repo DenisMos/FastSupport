@@ -24,7 +24,7 @@ jobs:
         run: dotnet restore
 
       - name: Build and pack
-        run: dotnet pack -c Release --no-build --output ./nupkg
+        run: dotnet pack ./src/file.handle.fast.support/FastSupport.File.csproj -c Release --output ./nupkg
 
       - name: Publish NuGet package
         env:
