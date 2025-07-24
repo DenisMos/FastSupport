@@ -4,12 +4,25 @@ namespace FastSupport.File.Handlers;
 
 public static class FlatDictionaryIOExtensions
 {
+	public static IEnumerable<KeyValuePair<string, string>> ReadFileDictionary<TKey>(
+		this FlatDictionaryIO<string, string> parser,
+		string fileName)
+	{
+		foreach(var item in parser.ReadFile(
+			fileName,
+			dataKey => (true, dataKey),
+			val => val))
+		{
+			yield return item;
+		}
+	}
+
 	public static IEnumerable<KeyValuePair<TKey, TValue>> ReadFileDictionaryAsEnums<TKey, TValue>(
 		this FlatDictionaryIO<TKey, TValue> parser,
 		string fileName,
 		Func<string, TValue> valueParse) where TKey : struct
 	{
-		foreach(var item in parser.ReadFileDictionary(
+		foreach(var item in parser.ReadFile(
 			fileName,
 			dataKey => (Enum.TryParse(dataKey, true, out TKey result), result),
 			val => valueParse(val)))
@@ -32,7 +45,7 @@ public static class FlatDictionaryIOExtensions
 		Dictionary<TKey, TValue> dict,
 		Func<TValue, string> valueSaver) where TKey : struct
 	{
-		parser.SaveFileDictionary(
+		parser.SaveFile(
 			fileName,
 			dict,
 			keyParse: key => key.ToString() ?? throw new InvalidEnumArgumentException(),

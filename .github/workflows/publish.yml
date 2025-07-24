@@ -1,0 +1,38 @@
+name: Publish NuGet Package
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET 6 and 7 SDKs
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: |
+            6.0.x
+            7.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build and pack
+        run: dotnet pack ./src/file.handle.fast.support/FastSupport.File.csproj -c Release --output ./nupkg
+
+      - name: Remove existing GitHub source (if any)
+        run: dotnet nuget remove source github || echo "Source github not found"
+
+      - name: Add GitHub Packages source
+        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+
+      - name: Publish NuGet package
+        env:
+          NUGET_API_KEY: ${{ secrets.GITHUB_TOKEN }}
+        run: dotnet nuget push ./nupkg/*.nupkg --source github --api-key $NUGET_API_KEY

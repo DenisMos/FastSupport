@@ -1,28 +1,35 @@
 ﻿// Test.1 Запись any объектов
-using FastSupport.File.DictionaryHandler;
+using FastSupport.File;
 using FastSupport.File.Handlers;
 
 var dictionary = new Dictionary<string, object>
 {
 	{ nameof(IDictionary<string, object>), typeof(IDictionary<string, object>) },
 	{ nameof(Int32), typeof(int) },
-	{ nameof(Int64), typeof(Int64) }
+	{ nameof(Int64), typeof(long) }
 };
 
 var dictionaryFileHandler = new FlatDictionaryIO<string, object>();
-dictionaryFileHandler.SaveFileDictionary(
-	"test1.cfg", 
-	dictionary,
-	key => key,
-	val => val?.ToString() ?? string.Empty);
+var fileTest1 = FileInfoToken.GetDefaultConfigToken("test1");
+using(var stream = fileTest1.OpenOrCreate())
+{
+	dictionaryFileHandler.SaveFile(
+		stream,
+		dictionary,
+		key => key,
+		val => val?.ToString() ?? string.Empty);
+}
 
 //Чтение
-foreach(var key in dictionaryFileHandler.ReadFileDictionary(
-	"test1.cfg", 
-	key => (true, key),
-	val => val))
-{ 
-	Console.WriteLine($"{key.Key} : {key.Value}");	
+using(var stream = fileTest1.OpenOrCreate())
+{
+	foreach(var key in dictionaryFileHandler.ReadFile(
+			stream,
+			key => (true, key),
+			val => val))
+	{
+		Console.WriteLine($"{key.Key} : {key.Value}");
+	}
 }
 
 // Test.2 Запись enums объектов
@@ -44,5 +51,27 @@ foreach(var item in dictionaryFileHandler2.ReadFileDictionaryAsEnums(
 	Console.WriteLine($"{item.Key} : {item.Value}");
 }
 
+// Test.3
 
 
+var flatContainer = new FlatDictionaryIO<string, int>();
+var con = flatContainer.ReadFile(
+	@"F:\Git\Repositories\Mallenoms\multitracking\src\Test\multitracking.calibration\bin\Debug\net7.0\calib.txt",
+	key => (true, key), 
+	val => Convert.ToInt32(val));
+
+var resdata = con.ToEntityMany(
+	constructor: ("ChannelId", pair => new Data()),
+	("dx", (d, p) => d.Dx = p.Value),
+	("dy", (d, p) => d.Dy = p.Value),
+	("sizeX",  (d, p) => d.W = p.Value),
+	("sizeY",  (d, p) => d.H = p.Value)).ToArray();
+
+
+class Data
+{
+	public int Dx;
+	public int Dy;
+	public int W;
+	public int H;
+}

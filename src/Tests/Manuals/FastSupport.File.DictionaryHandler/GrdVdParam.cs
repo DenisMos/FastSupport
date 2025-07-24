@@ -1,4 +1,4 @@
-﻿namespace FastSupport.File.DictionaryHandler;
+﻿namespace FastSupport.File.Handlers;
 
 public enum GrdVD_BindParameter : int
 {
