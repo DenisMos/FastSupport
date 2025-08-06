@@ -20,80 +20,102 @@ public sealed class FlatEntityIO : FlatIO
 		FileStream stream,
 		IDictionary<Type, Func<object, object>>? converters = null,
 		bool readFields = true,
-		bool readProperties = true)
+		bool readProperties = true,
+		bool connectWithCtr = false)
 	{
 		var type = typeof(TEntity);
+		object? obj = default;
 
-		FieldInfo[] fieldInfos   = Array.Empty<FieldInfo>();
-		PropertyInfo[] propInfos = Array.Empty<PropertyInfo>();
-
+		List<IDataField> fieldInfos = new();
 		if(readFields)
 		{
-			fieldInfos = type.GetFields();
+			fieldInfos.AddRange(type.GetFields().Select(x => new FieldDataField(x)));
 		}
 		if(readProperties)
-		{ 
-			propInfos = type.GetProperties();
+		{
+			fieldInfos.AddRange(type.GetProperties().Select(x => new PropertyDataField(x)));
 		}
 
-		object? obj;
-		try
+		if(connectWithCtr)
 		{
-			obj = Activator.CreateInstance(type);
-		}
-		catch(Exception exc)
-		{
-			throw new Exception($".ctor can be empty!");
-		}
+			var listArgs = new List<object>();
+			var schema = GetCtrSchema(type, fieldInfos);
+			var count = schema.Count();
 
-		using(var sr = new StreamReader(stream))
-		{
-			foreach(var row in ParseFlatRow(sr))
+			using(var sr = new StreamReader(stream))
 			{
-				var key = row.Key;
-				var val = row.Value;
+				foreach(var row in ParseFlatRow(sr))
+				{
+					var key = row.Key;
+					var val = row.Value;
 
-				var field = fieldInfos.FirstOrDefault(x => x.Name.Equals(key));
-				if(field != null)
-				{
-					Push(field.FieldType, field.SetValue, converters, obj, val);
-				}
-				else
-				{
-					var prop = propInfos.FirstOrDefault(x => x.Name.Equals(key));
-					if(prop != null)
+					if(obj != null)
 					{
-						Push(prop.PropertyType, prop.SetValue, converters, obj, val);
+						var sch = fieldInfos.FirstOrDefault(x => x.Name.Equals(key));
+						if(sch!= null)
+						{
+							DataTypeConvert.Push(sch, converters, obj, val);
+						}
+					}
+
+					if(count > 0)
+					{
+						var sch = schema.FirstOrDefault(x => x.Key.Equals(key));
+						if(sch.Value != null)
+						{
+							listArgs.Add(DataTypeConvert.ConvertTo(sch.Value, converters, val));
+						}
+					}
+
+					count--;
+
+					if(count == 0)
+					{
+						obj = Activator.CreateInstance(type, listArgs.ToArray());
 					}
 				}
 			}
+		}
+		else
+		{
+			obj = Activator.CreateInstance(type, 5);
+			using(var sr = new StreamReader(stream))
+			{
+				foreach(var row in ParseFlatRow(sr))
+				{
+					var key = row.Key;
+					var val = row.Value;
+
+					var field = fieldInfos.FirstOrDefault(x => x.Name.Equals(key));
+					if(field != null)
+					{
+						DataTypeConvert.Push(field, converters, obj, val);
+					}
+				}
+			}
+			
+		}
+
+		if(obj is null)
+		{
+			throw new Exception();
 		}
 
 		return (TEntity)obj;
 	}
 
-	private void Push(Type type, Action<object, object> action, IDictionary<Type, Func<object, object>>? converters, object obj, object val)
+	private IEnumerable<KeyValuePair<string, IDataField>> GetCtrSchema(Type type, IEnumerable<IDataField> fieldInfos)
 	{
-		switch(type)
+		var ctrs = type.GetConstructors().First();
+		foreach(var @param in ctrs.GetParameters())
 		{
-			case Type t when(t == typeof(int) || t == typeof(decimal)):
-				action(obj, Convert.ToInt32(val)); break;
-			case Type t when(t == typeof(float) || t == typeof(decimal)):
-				action(obj, Convert.ToSingle(val)); break;
-			case Type t when(t == typeof(string)):
-				action(obj, val); break;
-			case Type t when(t == typeof(long) || t == typeof(decimal)):
-				action(obj, Convert.ToInt64(val)); break;
-			case Type t when(t == typeof(byte)):
-				action(obj, Convert.ToByte(val)); break;
-			case Type t when(t == typeof(bool)):
-				action(obj, Convert.ToBoolean(val)); break;
-			default:
-				if(converters != null && converters.TryGetValue(type, out Func<object, object> converter))
-				{
-					action(obj, converter.Invoke(val)); break;
-				}
-				throw new ArgumentException($"Converter for type '{type.Name}' not founded! Added self converter in 'converters'!");
+			var name = @param.Name;
+
+			var field = fieldInfos.FirstOrDefault(x => x.Name.Equals(name));
+			if(field != null)
+			{
+				yield return new KeyValuePair<string, IDataField>(name, field);
+			}
 		}
 	}
 
@@ -101,34 +123,40 @@ public sealed class FlatEntityIO : FlatIO
 		TEntity entity, 
 		FileStream fileStream,
 		bool saveFields = true, 
-		bool saveProperties = true) where TEntity : class
+		bool saveProperties = true,
+		bool connectWithCtr = false) where TEntity : class
 	{ 
 		var type = typeof(TEntity);
 
 		using(var sw = new StreamWriter(fileStream))
 		{
+			List<IDataField> fieldInfos = new();
 			if(saveFields)
 			{
-				var fields = type.GetFields();
-
-				foreach(var field in fields)
-				{
-					PushInFile(sw, field.Name, field.GetValue(entity));
-				}
+				fieldInfos.AddRange(type.GetFields().Select(x => new FieldDataField(x)));
 			}
 			if(saveProperties)
 			{
-				var bindings = System.Reflection.BindingFlags.Instance
-					| System.Reflection.BindingFlags.Public
-					| System.Reflection.BindingFlags.NonPublic
-					| System.Reflection.BindingFlags.GetProperty
-					| System.Reflection.BindingFlags.SetProperty;
+				fieldInfos.AddRange(type.GetProperties().Select(x => new PropertyDataField(x)));
+			}
 
-				var props = type.GetProperties(bindings);
-
-				foreach(var porp in props)
+			if(connectWithCtr)
+			{
+				foreach(var schema in GetCtrSchema(type, fieldInfos))
 				{
-					PushInFile(sw, porp.Name, porp.GetValue(entity));
+					PushInFile(sw, schema.Value.Name, schema.Value.GetValue(entity));
+					fieldInfos.Remove(schema.Value);
+				}
+				foreach(var item in fieldInfos)
+				{
+					PushInFile(sw, item.Name, item.GetValue(entity));
+				}
+			}
+			else
+			{
+				foreach(var item in fieldInfos)
+				{
+					PushInFile(sw, item.Name, item.GetValue(entity));
 				}
 			}
 		}

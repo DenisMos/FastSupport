@@ -6,14 +6,12 @@ var data = new Data()
 	Dy = 2,
 	H  = 3,
 	W  = 4,
-	DX = 5,
-	Data2 = new Data()
 };
 
 using(var fs = new FileStream("data.txt", FileMode.OpenOrCreate, FileAccess.ReadWrite))
 { 
 	var handle = new FlatEntityIO();
-	handle.SaveFile(data, fs);
+	handle.SaveFile(data, fs, connectWithCtr: true);
 }
 
 using(var fs = new FileStream("data.txt", FileMode.Open, FileAccess.Read))
@@ -23,23 +21,23 @@ using(var fs = new FileStream("data.txt", FileMode.Open, FileAccess.Read))
 	{ 
 		{ typeof(Data), x => new Data() }
 	};
-	var res = handle.ReadFile<Data>(fs, converters);
+	var res = handle.ReadFile<Data>(fs, converters, connectWithCtr: true);
 }
 
-class Data
+record Data
 {
 	public int Dx;
 	public int Dy;
 	public int W;
 	public int H;
 
-
-	public int DX { get; set; }
-
-	public Data Data2 { get; set; }
-
-	public override string ToString()
+	public Data(int DX = 5, string Name = "")
 	{
-		return $"Это строка";
+		this.DX   = DX;
+		this.Name = Name;
 	}
+
+	public int DX { get; }
+
+	public string Name { get; }
 }
