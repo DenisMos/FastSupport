@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace FastSupport.File.Handlers;
+﻿namespace FastSupport.File.Handlers;
 
 /// <summary>Построчный обработчик файлов с классовой структурой.</summary>
 /// <remarks>Работает на основе рефлексии. Не учитывает вложения и новые типы, если не переопределены конвертеры.</remarks>
@@ -21,7 +19,7 @@ public sealed class FlatEntityIO : FlatIO
 		IDictionary<Type, Func<object, object>>? converters = null,
 		bool readFields = true,
 		bool readProperties = true,
-		bool connectWithCtr = false)
+		bool connectCtorAndFields = false)
 	{
 		var type = typeof(TEntity);
 		object? obj = default;
@@ -36,7 +34,7 @@ public sealed class FlatEntityIO : FlatIO
 			fieldInfos.AddRange(type.GetProperties().Select(x => new PropertyDataField(x)));
 		}
 
-		if(connectWithCtr)
+		if(connectCtorAndFields)
 		{
 			var listArgs = new List<object>();
 			var schema = GetCtrSchema(type, fieldInfos);
@@ -66,9 +64,7 @@ public sealed class FlatEntityIO : FlatIO
 							listArgs.Add(DataTypeConvert.ConvertTo(sch.Value, converters, val));
 						}
 					}
-
 					count--;
-
 					if(count == 0)
 					{
 						obj = Activator.CreateInstance(type, listArgs.ToArray());
@@ -124,7 +120,7 @@ public sealed class FlatEntityIO : FlatIO
 		FileStream fileStream,
 		bool saveFields = true, 
 		bool saveProperties = true,
-		bool connectWithCtr = false) where TEntity : class
+		bool connectCtorAndFields = false) where TEntity : class
 	{ 
 		var type = typeof(TEntity);
 
@@ -140,7 +136,7 @@ public sealed class FlatEntityIO : FlatIO
 				fieldInfos.AddRange(type.GetProperties().Select(x => new PropertyDataField(x)));
 			}
 
-			if(connectWithCtr)
+			if(connectCtorAndFields)
 			{
 				foreach(var schema in GetCtrSchema(type, fieldInfos))
 				{

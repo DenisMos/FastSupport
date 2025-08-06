@@ -1,6 +1,7 @@
-﻿// Test.1 Запись any объектов
-using FastSupport.File;
+﻿using FastSupport.File;
 using FastSupport.File.Handlers;
+
+using FastSupport.Dictionary.Pairs;
 
 var dictionary = new Dictionary<string, object>
 {

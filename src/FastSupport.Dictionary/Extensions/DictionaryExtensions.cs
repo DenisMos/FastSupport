@@ -1,4 +1,4 @@
-﻿namespace FastSupport.File.Handlers;
+﻿namespace FastSupport.Dictionary;
 
 public static class DictionaryExtensions
 {

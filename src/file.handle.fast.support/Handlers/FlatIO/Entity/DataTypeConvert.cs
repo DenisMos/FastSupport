@@ -17,10 +17,16 @@ internal static class DataTypeConvert
 				return val;
 			case Type t when(t == typeof(long) || t == typeof(decimal)):
 				return Convert.ToInt64(val);
+			case Type t when(t == typeof(double) || t == typeof(decimal)):
+				return Convert.ToDouble(val);
+			case Type t when(t == typeof(DateTime)):
+				return Convert.ToDateTime(val);
 			case Type t when(t == typeof(byte)):
 				return Convert.ToByte(val);
 			case Type t when(t == typeof(bool)):
 				return Convert.ToBoolean(val);
+			case Type t when(t == typeof(uint)):
+				return Convert.ToUInt32(val);
 
 			//Добавляем типы по надобности
 			default:

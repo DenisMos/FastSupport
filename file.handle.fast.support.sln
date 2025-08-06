@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FastSupport.File", "src\fil
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FastSupport.File.DictionaryHandler", "src\Tests\Manuals\FastSupport.File.DictionaryHandler\FastSupport.File.DictionaryHandler.csproj", "{C2950F6D-4E32-45FA-87FD-ECD1F32147CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FastSupport.File.EntityHandle", "src\Tests\Manuals\FastSupport.File.EntityHandle\FastSupport.File.EntityHandle.csproj", "{6261811C-513B-42AC-AA82-52CEFF0D6EF2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FastSupport.File.EntityHandle", "src\Tests\Manuals\FastSupport.File.EntityHandle\FastSupport.File.EntityHandle.csproj", "{6261811C-513B-42AC-AA82-52CEFF0D6EF2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FastSupport.Dictionary", "src\FastSupport.Dictionary\FastSupport.Dictionary.csproj", "{0C2E98B4-F87D-4C5F-B6B5-9713384021EE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +33,10 @@ Global
 		{6261811C-513B-42AC-AA82-52CEFF0D6EF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6261811C-513B-42AC-AA82-52CEFF0D6EF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6261811C-513B-42AC-AA82-52CEFF0D6EF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C2E98B4-F87D-4C5F-B6B5-9713384021EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C2E98B4-F87D-4C5F-B6B5-9713384021EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C2E98B4-F87D-4C5F-B6B5-9713384021EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C2E98B4-F87D-4C5F-B6B5-9713384021EE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -11,7 +11,7 @@ var data = new Data()
 using(var fs = new FileStream("data.txt", FileMode.OpenOrCreate, FileAccess.ReadWrite))
 { 
 	var handle = new FlatEntityIO();
-	handle.SaveFile(data, fs, connectWithCtr: true);
+	handle.SaveFile(data, fs, connectCtorAndFields: true);
 }
 
 using(var fs = new FileStream("data.txt", FileMode.Open, FileAccess.Read))
@@ -21,7 +21,7 @@ using(var fs = new FileStream("data.txt", FileMode.Open, FileAccess.Read))
 	{ 
 		{ typeof(Data), x => new Data() }
 	};
-	var res = handle.ReadFile<Data>(fs, converters, connectWithCtr: true);
+	var res = handle.ReadFile<Data>(fs, converters, connectCtorAndFields: true);
 }
 
 record Data

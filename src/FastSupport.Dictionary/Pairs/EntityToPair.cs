@@ -1,4 +1,4 @@
-﻿namespace FastSupport.File.Handlers;
+﻿namespace FastSupport.Dictionary.Pairs;
 
 /// <summary>Позволяет разбивать класс на пары <c>Ключ</c>/<c>Значение</c>.</summary>
 public static class EntityToPair

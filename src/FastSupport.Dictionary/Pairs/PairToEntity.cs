@@ -1,4 +1,4 @@
-﻿namespace FastSupport.File.Handlers;
+﻿namespace FastSupport.Dictionary.Pairs;
 
 public static class PairToEntity
 {

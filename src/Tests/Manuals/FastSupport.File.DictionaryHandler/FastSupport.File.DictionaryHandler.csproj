@@ -8,6 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\FastSupport.Dictionary\FastSupport.Dictionary.csproj" />
+    <ProjectReference Include="..\..\..\FastSupport.Dictionary\FastSupport.Dictionary.csproj" />
     <ProjectReference Include="..\..\..\file.handle.fast.support\FastSupport.File.csproj" />
   </ItemGroup>
 
