@@ -1,6 +1,6 @@
 ﻿namespace FastSupport.File.Handlers;
 
-internal static class FlatDictionaryIOConstants
+internal static class FlatIOConstants
 {
 	public static readonly string[] Ignorable = new string[] { "#" };
 

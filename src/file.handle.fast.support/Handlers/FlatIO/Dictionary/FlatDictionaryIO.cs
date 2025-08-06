@@ -2,20 +2,15 @@
 
 
 /// <summary>Построчный обработчик файлов со словарной структурой <c>Key</c>:<c>Value</c>.</summary>
-public class FlatDictionaryIO<TKey, TValue>
+public class FlatDictionaryIO<TKey, TValue> : FlatIO
 {
-	private readonly char[] _separator;
-	private readonly string[] _ignoreRowIfStartWith;
-
 	/// <summary>Initializes a new instance of the <see cref="DictionaryFileHandle"/> class.</summary>
 	/// <param name="separator">The separator.</param>
 	/// <param name="ignoreRowIfStartWith">The ignore row if start with.</param>
 	public FlatDictionaryIO(
 		char[]? separator = null,
-		string[]? ignoreRowIfStartWith = null)
+		string[]? ignoreRowIfStartWith = null) : base(separator, ignoreRowIfStartWith)
 	{
-		_separator = separator ?? FlatDictionaryIOConstants.Splitter;
-		_ignoreRowIfStartWith = ignoreRowIfStartWith ?? FlatDictionaryIOConstants.Ignorable;
 	}
 
 	/// <summary>Reads the file dictionary.</summary>
@@ -47,19 +42,12 @@ public class FlatDictionaryIO<TKey, TValue>
 	{
 		using(var sr = new StreamReader(fileStream))
 		{
-			while(!sr.EndOfStream)
+			foreach(var row in ParseFlatRow(sr))
 			{
-				var row = sr.ReadLine();
-
-				if(string.IsNullOrEmpty(row) || _ignoreRowIfStartWith.Any(x => row.StartsWith(x))) continue;
-
-				var columns = row.Split(_separator);
-				if(columns.Length <= 1) continue;
-
-				var keyData = keyParse(columns[0].Trim());
+				var keyData = keyParse(row.Key);
 				if(keyData.Item1)
 				{
-					yield return new KeyValuePair<TKey, TValue>(keyData.Item2, valueParse(columns[1].Trim()));
+					yield return new KeyValuePair<TKey, TValue>(keyData.Item2, valueParse(row.Value));
 				}
 			}
 		}
@@ -76,8 +64,6 @@ public class FlatDictionaryIO<TKey, TValue>
 		Func<TKey, string> keyParse,
 		Func<TValue, string> valueParse)
 	{
-		var sep = _separator.First();
-
 		using(var sr = new StreamWriter(fileStream))
 		{
 			foreach(var row in dict)
@@ -85,7 +71,7 @@ public class FlatDictionaryIO<TKey, TValue>
 				var key   = row.Key;
 				var value = row.Value;
 
-				sr.WriteLine($"{keyParse(key)}{sep}{valueParse(value)}");
+				PushInFile(sr, keyParse(key), valueParse(value));
 			}
 		}
 	}

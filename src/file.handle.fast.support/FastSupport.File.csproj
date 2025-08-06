@@ -7,7 +7,7 @@
         <RootNamespace>FastSupport.File</RootNamespace>
         <AssemblyName>fastSupport.file</AssemblyName>
         <LangVersion>Latest</LangVersion>
-        <Version>1.0.2</Version>
+        <Version>1.0.2-beta1</Version>
         
     </PropertyGroup>
 
